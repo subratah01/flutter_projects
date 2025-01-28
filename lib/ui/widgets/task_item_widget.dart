@@ -19,6 +19,7 @@ class TaskItemWidget extends StatefulWidget {
 
 class _TaskItemWidgetState extends State<TaskItemWidget> {
   bool _deleteTaskInProgress = false;
+  bool _updateTaskInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +59,10 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                           : const Icon(Icons.delete),
                     ),
                     IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.edit),
+                      onPressed: () => _updateTaskStatus(widget.taskModel.sId, 'Cancelled'),
+                      icon: _updateTaskInProgress
+                          ? const CircularProgressIndicator()
+                          : const Icon(Icons.edit),
                     ),
                   ],
                 )
@@ -77,13 +80,29 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
     setState(() {});
 
     final NetworkResponse response =
-    await NetworkCaller.getRequest(url: Urls.deleteTaskListById(taskId));
+    await NetworkCaller.getRequest(url: Urls.deleteTask(taskId));
     if (response.isSuccess) {
-      showSnackBarMessage(context, 'Task deleted successfully');
+      showSnackBarMessage(context, 'Task deleted successfully!');
     } else {
       showSnackBarMessage(context, response.errorMessage);
     }
     _deleteTaskInProgress = false;
+    setState(() {});
+  }
+
+  Future<void> _updateTaskStatus(String? taskId, String? status) async {
+    if (taskId == null || status == null) return;
+    _updateTaskInProgress = true;
+    setState(() {});
+
+    final NetworkResponse response =
+    await NetworkCaller.getRequest(url: Urls.updateTaskStatus(taskId, status));
+    if (response.isSuccess) {
+      showSnackBarMessage(context, 'Task updated successfully!');
+    } else {
+      showSnackBarMessage(context, response.errorMessage);
+    }
+    _updateTaskInProgress = false;
     setState(() {});
   }
 
