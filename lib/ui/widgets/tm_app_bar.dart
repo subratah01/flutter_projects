@@ -27,10 +27,10 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           CircleAvatar(
             radius: 16,
-            /*backgroundImage: MemoryImage(
+            backgroundImage: MemoryImage(
               base64Decode(AuthController.userModel?.photo ?? ''),
-            ),*/
-            // onBackgroundImageError: (_, __) => const Icon(Icons.person_outline),
+            ),
+            onBackgroundImageError: (_, __) => const Icon(Icons.person_outline),
           ),
           const SizedBox(width: 8),
           Expanded(

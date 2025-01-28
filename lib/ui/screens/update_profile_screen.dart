@@ -1,7 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/tm_app_bar.dart';
+
+import '../../data/services/network_caller.dart';
+import '../../data/utils/urls.dart';
+import '../controllers/auth_controller.dart';
+import '../widgets/centered_circular_progress_indicator.dart';
+import '../widgets/snack_bar_message.dart';
 
 class UpdateProfileScreen extends StatefulWidget {
   const UpdateProfileScreen({super.key});
@@ -19,11 +26,16 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final TextEditingController _mobileTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  XFile? _pickedImage;
   bool _updateProfileInProgress = false;
 
   @override
   void initState() {
     super.initState();
+    _emailTEController.text = AuthController.userModel?.email ?? '';
+    _firstNameTEController.text = AuthController.userModel?.firstName ?? '';
+    _lastNameTEController.text = AuthController.userModel?.lastName ?? '';
+    _mobileTEController.text = AuthController.userModel?.mobile ?? '';
   }
 
   @override
@@ -97,7 +109,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   const SizedBox(height: 24),
                   Visibility(
                     visible: _updateProfileInProgress == false,
-                    //replacement: const CenteredCircularProgressIndicator(),
+                    replacement: const CenteredCircularProgressIndicator(),
                     child: ElevatedButton(
                       onPressed: _onTapUpdateButton,
                       child: const Icon(Icons.arrow_circle_right_outlined),
@@ -114,7 +126,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
   Widget _buildPhotoPicker() {
     return GestureDetector(
-      //onTap: _pickImage,
+      onTap: _pickImage,
       child: Container(
         height: 50,
         decoration: BoxDecoration(
@@ -148,6 +160,15 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     );
   }
 
+  Future<void> _pickImage() async {
+    ImagePicker picker = ImagePicker();
+    XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      _pickedImage = image;
+      setState(() {});
+    }
+  }
+
   void _onTapUpdateButton() {
     if (_formKey.currentState!.validate()) {
       _updateProfile();
@@ -157,6 +178,30 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   Future<void> _updateProfile() async {
     _updateProfileInProgress = true;
     setState(() {});
+    Map<String, dynamic> requestBody = {
+      "email": _emailTEController.text.trim(),
+      "firstName": _firstNameTEController.text.trim(),
+      "lastName": _lastNameTEController.text.trim(),
+      "mobile": _mobileTEController.text.trim(),
+    };
+
+    if (_pickedImage != null) {
+      List<int> imageBytes = await _pickedImage!.readAsBytes();
+      requestBody['photo'] = base64Encode(imageBytes);
+    }
+    if (_passwordTEController.text.isNotEmpty) {
+      requestBody['password'] = _passwordTEController.text;
+    }
+    final NetworkResponse response = await NetworkCaller.postRequest(
+        url: Urls.updateProfile, body: requestBody);
+    _updateProfileInProgress = false;
+    setState(() {});
+    if (response.isSuccess) {
+      _passwordTEController.clear();
+      showSnackBarMessage(context, 'User profile update successful!');
+    } else {
+      showSnackBarMessage(context, response.errorMessage);
+    }
   }
 
   @override
