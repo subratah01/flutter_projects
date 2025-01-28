@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:task_manager/data/models/task_model.dart';
+import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
 import '../../data/services/network_caller.dart';
 import '../../data/utils/urls.dart';
@@ -72,27 +73,18 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
 
   Future<void> _deleteTask(String? taskId) async {
     if (taskId == null) return;
-
-    setState(() {
-      _deleteTaskInProgress = true;
-    });
+    _deleteTaskInProgress = true;
+    setState(() {});
 
     final NetworkResponse response =
     await NetworkCaller.getRequest(url: Urls.deleteTaskListById(taskId));
     if (response.isSuccess) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Task deleted successfully')),
-      );
-      // Optionally, you can trigger a callback or remove the task from the list.
+      showSnackBarMessage(context, 'Task deleted successfully');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete task: ${response.errorMessage}')),
-      );
+      showSnackBarMessage(context, response.errorMessage);
     }
-
-    setState(() {
-      _deleteTaskInProgress = false;
-    });
+    _deleteTaskInProgress = false;
+    setState(() {});
   }
 
   Color _getStatusColor(String status) {
