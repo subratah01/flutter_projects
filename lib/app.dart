@@ -70,6 +70,7 @@ class TaskManagerApp extends StatelessWidget {
           widget = const ForgotPasswordVerifyEmailScreen();
         }
         else if (settings.name == ForgotPasswordVerifyOtpScreen.name) {
+          //final args=settings.arguments;
           widget = const ForgotPasswordVerifyOtpScreen();
         }
         else if (settings.name == ResetPasswordScreen.name) {
@@ -88,6 +89,7 @@ class TaskManagerApp extends StatelessWidget {
           widget = const UpdateProfileScreen();
         }
 
+        final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(builder: (_) => widget);
       },
     );
