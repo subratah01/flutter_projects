@@ -31,10 +31,8 @@ class _ForgotPasswordVerifyOtpScreenState
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
-    final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-    print('Args: $args');
-    _email = args?['email'] ?? "No email provided";
+    final args = ModalRoute.of(context)!.settings?.arguments as Map<String, dynamic>;
+    _email = args['email'].toString();
 
     return Scaffold(
       body: ScreenBackground(

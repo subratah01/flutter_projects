@@ -95,7 +95,7 @@ class _ForgotPasswordVerifyEmailScreenState
     _recoverVerifyEmailInProgress = false;
     setState(() {});
     if (response.isSuccess) {
-      Navigator.pushReplacementNamed(
+      Navigator.pushNamed(
         context,
         ForgotPasswordVerifyOtpScreen.name,
         arguments: {"email": _emailTEController.text},
