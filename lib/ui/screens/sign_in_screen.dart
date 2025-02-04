@@ -122,7 +122,7 @@ class _SignInScreenState extends State<SignInScreen> {
     };
     final NetworkResponse response =
     await NetworkCaller.postRequest(url: Urls.loginUrl, body: requestBody);
-    print('My response: $response');
+    //print('My response: $response');
     if (response.isSuccess) {
       String token = response.responseData!['token'];
       UserModel userModel = UserModel.fromJson(response.responseData!['data']);
