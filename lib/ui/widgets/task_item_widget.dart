@@ -20,6 +20,8 @@ class TaskItemWidget extends StatefulWidget {
 class _TaskItemWidgetState extends State<TaskItemWidget> {
   bool _deleteTaskInProgress = false;
   bool _updateTaskInProgress = false;
+  String _selectedTaskState = '';
+  final List<String> _taskStates = ['New', 'Progress', 'Completed','Cancelled'];
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +61,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                           : const Icon(Icons.delete),
                     ),
                     IconButton(
-                      onPressed: () => _updateTaskStatus(widget.taskModel.sId, 'Cancelled'),
+                      onPressed: () => _showTaskStateDialog(context),
                       icon: _updateTaskInProgress
                           ? const CircularProgressIndicator()
                           : const Icon(Icons.edit),
@@ -71,6 +73,51 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showTaskStateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String tempSelected = _selectedTaskState;
+
+        return AlertDialog(
+          title: const Text('Select Task State'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: _taskStates.map((state){
+                  return RadioListTile<String>(
+                    title: Text(state),
+                    value: state,
+                    groupValue: tempSelected,
+                    onChanged: (String? value) {
+                      setModalState(() => tempSelected = value!);
+                    },
+                  );
+                }).toList(),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() => _selectedTaskState = tempSelected);
+                Navigator.pop(context);
+                //print(_selectedTaskState);
+                _updateTaskStatus(widget.taskModel.sId, _selectedTaskState);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 
