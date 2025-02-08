@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/task_item_widget.dart';
 import 'package:task_manager/ui/widgets/task_status_summary_counter_widget.dart';
 import 'package:task_manager/ui/widgets/tm_app_bar.dart';
 
 import '../../data/models/task_list_by_status_model.dart';
+import '../../data/models/task_model.dart';
 import '../../data/services/network_caller.dart';
 import '../../data/utils/urls.dart';
+import '../controllers/task_list_controller.dart';
 import '../widgets/snack_bar_message.dart';
 
 class ProgressTaskListScreen extends StatefulWidget {
@@ -17,8 +20,7 @@ class ProgressTaskListScreen extends StatefulWidget {
 }
 
 class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
-
-  bool _getProgressTaskListInProgress = false;
+  final TaskListController _taskListController = Get.find<TaskListController>();
   TaskListByStatusModel? progressTaskListModel;
 
   @override
@@ -34,37 +36,37 @@ class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
       body: ScreenBackground(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: _buildTaskListView(),
+          child: GetBuilder<TaskListController>(builder: (controller) {
+            return Visibility(
+              visible: controller.inProgress == false,
+              replacement: const Center(
+                child: Text('Data loading...'),
+              ),
+              child: _buildTaskListView(controller.taskList),
+            );
+          }),
         ),
       ),
     );
   }
 
-  Widget _buildTaskListView() {
+  Widget _buildTaskListView(List<TaskModel> taskList) {
     return ListView.builder(
       shrinkWrap: true,
       primary: false,
-      itemCount: progressTaskListModel?.taskList?.length ?? 0,
+      itemCount: taskList?.length ?? 0,
       itemBuilder: (context, index) {
         return TaskItemWidget(
-          taskModel: progressTaskListModel!.taskList![index],
+          taskModel: taskList![index],
         );
       },
     );
   }
 
   Future<void> _getProgressTaskList() async {
-    _getProgressTaskListInProgress = true;
-    setState(() {});
-    final NetworkResponse response =
-    await NetworkCaller.getRequest(url: Urls.taskListByStatusUrl('Progress'));
-    if (response.isSuccess) {
-      progressTaskListModel = TaskListByStatusModel.fromJson(response.responseData!);
-    } else {
-      showSnackBarMessage(context, response.errorMessage);
+    final bool isSuccess = await _taskListController.getTaskList("Progress");
+    if (!isSuccess) {
+      showSnackBarMessage(context, _taskListController.errorMessage!);
     }
-    _getProgressTaskListInProgress = false;
-    setState(() {});
   }
-
 }

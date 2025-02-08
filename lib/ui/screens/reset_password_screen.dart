@@ -1,11 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/ui/screens/sign_in_screen.dart';
 import 'package:task_manager/ui/utils/app_colors.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 
+import '../../data/models/reset_password_model.dart';
 import '../../data/services/network_caller.dart';
 import '../../data/utils/urls.dart';
+import '../controllers/reset_password_controller.dart';
 import '../widgets/centered_circular_progress_indicator.dart';
 import '../widgets/snack_bar_message.dart';
 
@@ -24,7 +27,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _confirmPasswordTEController =
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _resetPasswordInProgress = false;
+  final ResetPasswordController _resetPasswordController =
+      Get.find<ResetPasswordController>();
   String _email = "";
   String _otp = "";
 
@@ -67,14 +71,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         const InputDecoration(hintText: 'Confirm New Password'),
                   ),
                   const SizedBox(height: 24),
-                  Visibility(
-                    visible: _resetPasswordInProgress == false,
-                    replacement: const CenteredCircularProgressIndicator(),
-                    child: ElevatedButton(
-                      onPressed: _onTapResetPasswordButton,
-                      child: const Text('Confirm'),
-                    ),
-                  ),
+                  GetBuilder<ResetPasswordController>(builder: (controller) {
+                    return Visibility(
+                      visible: controller.inProgress == false,
+                      replacement: const CenteredCircularProgressIndicator(),
+                      child: ElevatedButton(
+                        onPressed: _onTapResetPasswordButton,
+                        child: const Text('Confirm'),
+                      ),
+                    );
+                  }),
                   const SizedBox(height: 48),
                   Center(
                     child: _buildSignInSection(),
@@ -99,30 +105,21 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Future<void> _resetPasswordOTP() async {
-    _resetPasswordInProgress = true;
-    setState(() {});
+    final model = ResetPasswordModel(
+      email: _email,
+      otp: _otp,
+      password: _newPasswordTEController.text,
+    );
+    final bool isSuccess =
+        await _resetPasswordController.resetPasswordOTP(model);
+    if (isSuccess) {
+      Get.offAllNamed(SignInScreen.name);
 
-    Map<String, dynamic> requestBody = {
-      "email": _email,
-      "OTP": _otp,
-      "password": _newPasswordTEController.text
-    };
-
-    final NetworkResponse response = await NetworkCaller.postRequest(
-        url: Urls.resetPassword, body: requestBody);
-    _resetPasswordInProgress = false;
-    setState(() {});
-    if (response.isSuccess) {
-      Navigator.pushNamedAndRemoveUntil(
-          context, SignInScreen.name, (predicate) => false);
+      /*Navigator.pushNamedAndRemoveUntil(
+          context, SignInScreen.name, (predicate) => false);*/
     } else {
-      showSnackBarMessage(context, response.errorMessage);
+      showSnackBarMessage(context, _resetPasswordController.errorMessage!);
     }
-  }
-
-  void _clearTextFields() {
-    _newPasswordTEController.clear();
-    _confirmPasswordTEController.clear();
   }
 
   Widget _buildSignInSection() {
@@ -139,8 +136,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             ),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, SignInScreen.name, (value) => false);
+                Get.offAllNamed(SignInScreen.name);
+
+                /*Navigator.pushNamedAndRemoveUntil(
+                    context, SignInScreen.name, (value) => false);*/
               },
           )
         ],

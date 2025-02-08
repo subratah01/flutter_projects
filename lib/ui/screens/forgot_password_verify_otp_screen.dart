@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:task_manager/ui/screens/reset_password_screen.dart';
 import 'package:task_manager/ui/screens/sign_in_screen.dart';
@@ -8,6 +9,7 @@ import 'package:task_manager/ui/widgets/screen_background.dart';
 
 import '../../data/services/network_caller.dart';
 import '../../data/utils/urls.dart';
+import '../controllers/forgot_password_controller.dart';
 import '../widgets/centered_circular_progress_indicator.dart';
 import '../widgets/snack_bar_message.dart';
 
@@ -25,13 +27,15 @@ class _ForgotPasswordVerifyOtpScreenState
     extends State<ForgotPasswordVerifyOtpScreen> {
   final TextEditingController _otpTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _recoverVerifyOtpInProgress = false;
+  final ForgotPasswordController _forgotPasswordController =
+      Get.find<ForgotPasswordController>();
   String _email = "";
 
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
-    final args = ModalRoute.of(context)!.settings?.arguments as Map<String, dynamic>;
+    final args =
+        ModalRoute.of(context)!.settings?.arguments as Map<String, dynamic>;
     _email = args['email'].toString();
 
     return Scaffold(
@@ -54,14 +58,16 @@ class _ForgotPasswordVerifyOtpScreenState
                   const SizedBox(height: 24),
                   _buildPinCodeTextField(),
                   const SizedBox(height: 24),
-                  Visibility(
-                    visible: _recoverVerifyOtpInProgress == false,
-                    replacement: const CenteredCircularProgressIndicator(),
-                    child: ElevatedButton(
-                      onPressed: _onTapRecoverVerifyOtpButton,
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-                    ),
-                  ),
+                  GetBuilder<ForgotPasswordController>(builder: (controller) {
+                    return Visibility(
+                      visible: controller.inProgress == false,
+                      replacement: const CenteredCircularProgressIndicator(),
+                      child: ElevatedButton(
+                        onPressed: _onTapRecoverVerifyOtpButton,
+                        child: const Icon(Icons.arrow_circle_right_outlined),
+                      ),
+                    );
+                  }),
                   const SizedBox(height: 48),
                   Center(
                     child: _buildSignInSection(),
@@ -82,25 +88,14 @@ class _ForgotPasswordVerifyOtpScreenState
   }
 
   Future<void> _recoverVerifyOTP() async {
-    _recoverVerifyOtpInProgress = true;
-    setState(() {});
-
-    final NetworkResponse response = await NetworkCaller.getRequest(
-        url: Urls.recoverVerifyOTP(_email, _otpTEController.text.trim()));
-    _recoverVerifyOtpInProgress = false;
-    setState(() {});
-    print (response);
-    if (response.isSuccess) {
-      Navigator.pushNamed(
-        context,
+    final bool isSuccess=await _forgotPasswordController.recoverVerifyOTP(_email, _otpTEController.text.trim());
+    if (isSuccess) {
+      Get.toNamed(
         ResetPasswordScreen.name,
-        arguments: {
-          "email": _email,
-          "otp": _otpTEController.text.trim()
-        },
+        arguments: {"email": _email, "otp": _otpTEController.text.trim()},
       );
     } else {
-      showSnackBarMessage(context, response.errorMessage);
+      showSnackBarMessage(context, _forgotPasswordController.errorMessage!);
     }
   }
 
@@ -148,8 +143,13 @@ class _ForgotPasswordVerifyOtpScreenState
             ),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, SignInScreen.name, (value) => false);
+                Get.offAllNamed(
+                  SignInScreen.name,
+                  predicate: (predicate) => false,
+                );
+
+                /*Navigator.pushNamedAndRemoveUntil(
+                    context, SignInScreen.name, (value) => false);*/
               },
           )
         ],

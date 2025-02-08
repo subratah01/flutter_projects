@@ -5,7 +5,6 @@ import 'package:task_manager/ui/screens/progress_task_list_screen.dart';
 
 import 'cancelled_task_list_screen.dart';
 
-
 class MainBottomNavScreen extends StatefulWidget {
   const MainBottomNavScreen({super.key});
 
@@ -35,10 +34,12 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
           setState(() {});
         },
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.new_label_outlined), label: 'New'),
+          NavigationDestination(
+              icon: Icon(Icons.new_label_outlined), label: 'New'),
           NavigationDestination(icon: Icon(Icons.refresh), label: 'Progress'),
           NavigationDestination(icon: Icon(Icons.done), label: 'Completed'),
-          NavigationDestination(icon: Icon(Icons.cancel_outlined), label: 'Cancelled'),
+          NavigationDestination(
+              icon: Icon(Icons.cancel_outlined), label: 'Cancelled'),
         ],
       ),
     );

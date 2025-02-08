@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
 import 'package:task_manager/ui/screens/sign_in_screen.dart';
@@ -7,6 +8,8 @@ import 'package:task_manager/ui/widgets/centered_circular_progress_indicator.dar
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
+import '../../data/models/user_data_model.dart';
+import '../controllers/sign_up_controller.dart';
 import '../utils/app_colors.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -25,11 +28,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _mobileTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _signUpInProgress = false;
+  final SignUpController _signUpController = Get.find<SignUpController>();
 
   @override
   Widget build(BuildContext context) {
-    final textTheme=Theme.of(context).textTheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       body: ScreenBackground(
@@ -43,7 +46,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const SizedBox(height: 40),
-                    Text('Join With Us', style: textTheme.titleLarge,),
+                    Text(
+                      'Join With Us',
+                      style: textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 24),
                     TextFormField(
                       controller: _emailTEController,
@@ -108,18 +114,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       },
                     ),
                     const SizedBox(height: 24),
-                    Visibility(
-                      visible: _signUpInProgress == false,
-                      replacement: const CenteredCircularProgressIndicator(),
-                      child: ElevatedButton(
-                        onPressed: _onTapSignUpButton,
-                        child: const Icon(Icons.arrow_circle_right_outlined),
-                      ),
-                    ),
+                    GetBuilder<SignUpController>(builder: (controller) {
+                      return Visibility(
+                        visible: controller.inProgress == false,
+                        replacement: const CenteredCircularProgressIndicator(),
+                        child: ElevatedButton(
+                          onPressed: _onTapSignUpButton,
+                          child: const Icon(Icons.arrow_circle_right_outlined),
+                        ),
+                      );
+                    }),
                     const SizedBox(height: 48),
-                    Center(
-                        child:_buildSignInSection()
-                    )
+                    Center(child: _buildSignInSection())
                     //ElevatedButton(onPressed: (){}, child: const Text('Sign in'))
                   ],
                 ),
@@ -138,27 +144,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _registerUser() async {
-    _signUpInProgress = true;
-    setState(() {});
-
-    Map<String, dynamic> requestBody = {
-      "email": _emailTEController.text.trim(),
-      "firstName": _firstNameTEController.text.trim(),
-      "lastName": _lastNameTEController.text.trim(),
-      "mobile": _mobileTEController.text.trim(),
-      "password": _passwordTEController.text,
-      "photo": ""
-    };
-
-    final NetworkResponse response = await NetworkCaller.postRequest(
-        url: Urls.registrationUrl, body: requestBody);
-    _signUpInProgress = false;
-    setState(() {});
-    if (response.isSuccess) {
+    final user = UserDataModel(
+      email: _emailTEController.text.trim(),
+      firstName: _firstNameTEController.text.trim(),
+      lastName: _lastNameTEController.text.trim(),
+      mobile: _mobileTEController.text.trim(),
+      password: _passwordTEController.text,
+      photo: ""
+    );
+    final bool isRegistered  = await _signUpController.registerUser(user);
+    if (isRegistered) {
       _clearTextFields();
       showSnackBarMessage(context, 'New user registration successful!');
     } else {
-      showSnackBarMessage(context, response.errorMessage);
+      showSnackBarMessage(context, _signUpController.errorMessage!);
     }
   }
 
@@ -170,22 +169,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _mobileTEController.clear();
   }
 
-
   Widget _buildSignInSection() {
     return RichText(
       text: TextSpan(
         text: "Already have an account? ",
-        style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+        style:
+            const TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
         children: [
           TextSpan(
-            text: 'Sign in',
-            style: const TextStyle(
-              color: AppColors.themeColor,
-            ),
-            recognizer: TapGestureRecognizer()..onTap=(){
-              Navigator.pop(context);
-            }
-          )
+              text: 'Sign in',
+              style: const TextStyle(
+                color: AppColors.themeColor,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  Get.back();
+                  //Navigator.pop(context);
+                })
         ],
       ),
     );
@@ -200,7 +200,4 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _passwordTEController.dispose();
     super.dispose();
   }
-
 }
-
-

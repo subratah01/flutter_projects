@@ -1,5 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:task_manager/ui/controllers/forgot_password_controller.dart';
 import 'package:task_manager/ui/screens/forgot_password_verify_otp_screen.dart';
 import 'package:task_manager/ui/utils/app_colors.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
@@ -23,7 +25,8 @@ class _ForgotPasswordVerifyEmailScreenState
     extends State<ForgotPasswordVerifyEmailScreen> {
   final TextEditingController _emailTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _recoverVerifyEmailInProgress = false;
+  final ForgotPasswordController _forgotPasswordController =
+      Get.find<ForgotPasswordController>();
 
   @override
   Widget build(BuildContext context) {
@@ -59,14 +62,16 @@ class _ForgotPasswordVerifyEmailScreenState
                     },
                   ),
                   const SizedBox(height: 24),
-                  Visibility(
-                    visible: _recoverVerifyEmailInProgress == false,
-                    replacement: const CenteredCircularProgressIndicator(),
-                    child: ElevatedButton(
-                      onPressed: _onTapRecoverVerifyEmailButton,
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-                    ),
-                  ),
+                  GetBuilder<ForgotPasswordController>(builder: (controller) {
+                    return Visibility(
+                      visible: controller.inProgress == false,
+                      replacement: const CenteredCircularProgressIndicator(),
+                      child: ElevatedButton(
+                        onPressed: _onTapRecoverVerifyEmailButton,
+                        child: const Icon(Icons.arrow_circle_right_outlined),
+                      ),
+                    );
+                  }),
                   const SizedBox(height: 48),
                   Center(
                     child: _buildSignInSection(),
@@ -87,21 +92,20 @@ class _ForgotPasswordVerifyEmailScreenState
   }
 
   Future<void> _recoverVerifyEmail() async {
-    _recoverVerifyEmailInProgress = true;
-    setState(() {});
-
-    final NetworkResponse response = await NetworkCaller.getRequest(
-        url: Urls.recoverVerifyEmail(_emailTEController.text.trim()));
-    _recoverVerifyEmailInProgress = false;
-    setState(() {});
-    if (response.isSuccess) {
-      Navigator.pushNamed(
-        context,
+    final bool isSuccess= await _forgotPasswordController.recoverVerifyEmail(_emailTEController.text.trim());
+    if (isSuccess) {
+      Get.toNamed(
         ForgotPasswordVerifyOtpScreen.name,
         arguments: {"email": _emailTEController.text},
       );
+
+      /*Navigator.pushNamed(
+        context,
+        ForgotPasswordVerifyOtpScreen.name,
+        arguments: {"email": _emailTEController.text},
+      );*/
     } else {
-      showSnackBarMessage(context, response.errorMessage);
+      showSnackBarMessage(context, _forgotPasswordController.errorMessage!);
     }
   }
 
@@ -119,7 +123,8 @@ class _ForgotPasswordVerifyEmailScreenState
             ),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                Navigator.pop(context);
+                //Navigator.pop(context);
+                Get.back();
               },
           )
         ],
