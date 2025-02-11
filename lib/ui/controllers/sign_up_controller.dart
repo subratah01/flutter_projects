@@ -1,11 +1,8 @@
 import 'package:get/get.dart';
 
-import '../../data/models/user_model.dart';
 import '../../data/models/user_data_model.dart';
 import '../../data/services/network_caller.dart';
 import '../../data/utils/urls.dart';
-import '../screens/main_bottom_nav_screen.dart';
-import 'auth_controller.dart';
 
 class SignUpController extends GetxController {
   //Declaration of variables
