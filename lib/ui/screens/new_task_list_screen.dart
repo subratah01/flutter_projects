@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:task_manager/data/models/task_list_by_status_model.dart';
 import 'package:task_manager/ui/screens/add_new_task_screen.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/task_item_widget.dart';
@@ -10,8 +9,6 @@ import 'package:task_manager/ui/widgets/tm_app_bar.dart';
 import '../../data/models/task_count_by_status_model.dart';
 import '../../data/models/task_count_model.dart';
 import '../../data/models/task_model.dart';
-import '../../data/services/network_caller.dart';
-import '../../data/utils/urls.dart';
 import '../controllers/task_list_controller.dart';
 import '../controllers/task_summary_controller.dart';
 import '../widgets/centered_circular_progress_indicator.dart';

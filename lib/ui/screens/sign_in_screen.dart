@@ -1,8 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:task_manager/data/services/network_caller.dart';
-import 'package:task_manager/data/utils/urls.dart';
 import 'package:task_manager/ui/screens/forgot_password_verify_email_screen.dart';
 import 'package:task_manager/ui/screens/main_bottom_nav_screen.dart';
 import 'package:task_manager/ui/screens/sign_up_screen.dart';
@@ -10,8 +8,6 @@ import 'package:task_manager/ui/widgets/centered_circular_progress_indicator.dar
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
-import '../../data/models/user_model.dart';
-import '../controllers/auth_controller.dart';
 import '../controllers/sign_in_controller.dart';
 import '../utils/app_colors.dart';
 

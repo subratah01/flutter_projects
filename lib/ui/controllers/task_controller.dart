@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,24 +5,32 @@ import '../../data/services/network_caller.dart';
 import '../../data/utils/urls.dart';
 
 class TaskController extends GetxController {
-  //Declaration of variables
-  bool _deleteTaskInProgress = false;
-  bool _updateTaskInProgress = false;
+  // Declaration of variables
+  Map<String, bool> _taskLoadingStateForDelete = {}; // Tracks loading states per task
+  Map<String, bool> _taskLoadingStateForUpdate = {}; // Tracks loading states per task
   String? _errorMessage;
   final List<String> _taskStates = ['New', 'Progress', 'Completed', 'Cancelled'];
 
-  //Getter Methods
-  bool get deleteTaskInProgress => _deleteTaskInProgress;
-
-  bool get updateTaskInProgress => _updateTaskInProgress;
+  // Getter Methods
+  bool getTaskLoadingStateForDelete(String taskId) => _taskLoadingStateForDelete[taskId] ?? false;
+  bool getTaskLoadingStateForUpdate(String taskId) => _taskLoadingStateForUpdate[taskId] ?? false;
 
   String? get errorMessage => _errorMessage;
 
   List<String> get taskStates => _taskStates;
 
+  // Update the loading state for a specific task
+  void _setTaskLoadingStateForDelete(String taskId, bool value) {
+    _taskLoadingStateForDelete[taskId] = value;
+    update(); // Notify listeners to rebuild UI
+  }
+  void _setTaskLoadingStateForUpdate(String taskId, bool value) {
+    _taskLoadingStateForUpdate[taskId] = value;
+    update(); // Notify listeners to rebuild UI
+  }
 
   Future<bool> deleteTask(String taskId) async {
-    _setDeleteLoading(true, taskId);
+    _setTaskLoadingStateForDelete(taskId, true); // Set the task as loading
 
     try {
       final NetworkResponse response =
@@ -37,14 +43,14 @@ class TaskController extends GetxController {
     } catch (e) {
       _setErrorMessage('Something went wrong. Please try again.');
     } finally {
-      _setDeleteLoading(false, taskId);
+      _setTaskLoadingStateForDelete(taskId, false); // Set the task as not loading
     }
 
     return false;
   }
 
   Future<bool> updateTaskStatus(String taskId, String status) async {
-    _setUpdateLoading(true);
+    _setTaskLoadingStateForUpdate(taskId, true); // Set the task as loading
 
     try {
       final NetworkResponse response = await NetworkCaller.getRequest(
@@ -57,7 +63,7 @@ class TaskController extends GetxController {
     } catch (e) {
       _setErrorMessage('Something went wrong. Please try again.');
     } finally {
-      _setUpdateLoading(false);
+      _setTaskLoadingStateForUpdate(taskId, false); // Set the task as not loading
     }
 
     return false;
@@ -85,20 +91,4 @@ class TaskController extends GetxController {
       update();
     }
   }
-
-  void _setDeleteLoading(bool value, String taskId) {
-    if (_deleteTaskInProgress != value) {
-      _deleteTaskInProgress = value;
-      update();
-    }
-  }
-
-  void _setUpdateLoading(bool value) {
-    if (_updateTaskInProgress != value) {
-      _updateTaskInProgress = value;
-      update();
-    }
-  }
-
-
 }

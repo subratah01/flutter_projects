@@ -17,6 +17,7 @@ class SignUpController extends GetxController {
 
   String? get errorMessage => _errorMessage;
 
+
   Future<bool> registerUser(UserDataModel user) async {
     _setLoading(true);
 

@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,8 +8,6 @@ import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/tm_app_bar.dart';
 
 import '../../data/models/user_data_model.dart';
-import '../../data/services/network_caller.dart';
-import '../../data/utils/urls.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/centered_circular_progress_indicator.dart';
 import '../widgets/snack_bar_message.dart';

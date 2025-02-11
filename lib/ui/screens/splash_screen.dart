@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_common/get_reset.dart';
-//import 'package:get/get_core/src/get_main.dart';
 import 'package:task_manager/ui/controllers/auth_controller.dart';
 import 'package:task_manager/ui/screens/sign_in_screen.dart';
 import 'package:task_manager/ui/widgets/app_logo.dart';

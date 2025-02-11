@@ -6,8 +6,6 @@ import 'package:task_manager/ui/screens/forgot_password_verify_otp_screen.dart';
 import 'package:task_manager/ui/utils/app_colors.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 
-import '../../data/services/network_caller.dart';
-import '../../data/utils/urls.dart';
 import '../widgets/centered_circular_progress_indicator.dart';
 import '../widgets/snack_bar_message.dart';
 

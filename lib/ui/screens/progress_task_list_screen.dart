@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:task_manager/ui/widgets/screen_background.dart';
 import 'package:task_manager/ui/widgets/task_item_widget.dart';
-import 'package:task_manager/ui/widgets/task_status_summary_counter_widget.dart';
 import 'package:task_manager/ui/widgets/tm_app_bar.dart';
 
 import '../../data/models/task_list_by_status_model.dart';
 import '../../data/models/task_model.dart';
-import '../../data/services/network_caller.dart';
-import '../../data/utils/urls.dart';
 import '../controllers/task_list_controller.dart';
 import '../widgets/snack_bar_message.dart';
 

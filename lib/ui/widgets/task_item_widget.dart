@@ -4,9 +4,6 @@ import 'package:task_manager/data/models/task_model.dart';
 import 'package:task_manager/ui/controllers/task_controller.dart';
 import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
-import '../../data/services/network_caller.dart';
-import '../../data/utils/urls.dart';
-
 class TaskItemWidget extends StatefulWidget {
   const TaskItemWidget({
     super.key,
@@ -57,7 +54,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                     GetBuilder<TaskController>(
                       builder: (controller) {
                         return Visibility(
-                          visible: !controller.deleteTaskInProgress,
+                          visible: !controller.getTaskLoadingStateForDelete(widget.taskModel.sId.toString()),
                           replacement: const CircularProgressIndicator(),
                           child: IconButton(
                             onPressed: () => _deleteTask(widget.taskModel.sId),
@@ -69,7 +66,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                     GetBuilder<TaskController>(
                       builder: (controller) {
                         return Visibility(
-                          visible: !controller.updateTaskInProgress,
+                          visible: !controller.getTaskLoadingStateForUpdate(widget.taskModel.sId.toString()),
                           replacement: const CircularProgressIndicator(),
                           child: IconButton(
                             onPressed: () => _showTaskStateDialog(context),
@@ -79,7 +76,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                       },
                     ),
                   ],
-                ),
+                )
               ],
             )
           ],
